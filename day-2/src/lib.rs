@@ -4,7 +4,7 @@ enum Outcome {
     Loss(i32),
 }
 
-pub fn proc_part1(input: String) -> String {
+pub fn proc_part1(input: &str) -> String {
     let res = input
         .lines()
         .map(|line| {
@@ -39,17 +39,58 @@ pub fn proc_part1(input: String) -> String {
     res.to_string()
 }
 
+pub fn proc_part2(input: &str) -> String {
+    let res = input
+        .lines()
+        .map(|line| {
+            line.split_whitespace()
+                .map(|action| match action {
+                    "A" => 1,
+                    "B" => 2,
+                    "C" => 3,
+                    "X" => 0,
+                    "Y" => 3,
+                    "Z" => 6,
+                    _ => 0,
+                })
+                .collect::<Vec<i32>>()
+        })
+        .map(|guide| match guide[1] {
+            0 => Outcome::Loss(guide[0] + 2),
+            3 => Outcome::Draw(guide[0]),
+            6 => Outcome::Win(guide[0] + 1),
+            _ => Outcome::Loss(0),
+        })
+        .map(|outcome| match outcome {
+            Outcome::Win(a) => Outcome::Win(if a > 3 { a - 3 } else { a }),
+            Outcome::Draw(a) => Outcome::Draw(if a > 3 { a - 3 } else { a }),
+            Outcome::Loss(a) => Outcome::Loss(if a > 3 { a - 3 } else { a }),
+        })
+        .map(|outcome| match outcome {
+            Outcome::Win(a) => 6 + a,
+            Outcome::Draw(a) => 3 + a,
+            Outcome::Loss(a) => a,
+        })
+        .sum::<i32>();
+
+    res.to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    static INPUT: &'static str = "A Y
+B X
+C Z";
+
     #[test]
     fn test_part1() {
-        let input = "A Y
-B X
-C Z"
-        .to_string();
+        assert_eq!(proc_part1(INPUT), "15");
+    }
 
-        assert_eq!(proc_part1(input), "15");
+    #[test]
+    fn test_part2() {
+        assert_eq!(proc_part2(INPUT), "12");
     }
 }
